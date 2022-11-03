@@ -83,7 +83,7 @@ public:
 	 * @param printers List of Pointers to printers
 	 * @param level Logging level
 	 */
-	inline void begin(std::initializer_list<Print *> &&printers, LoggingLevel level)
+	inline void begin(std::initializer_list<Print *> printers, LoggingLevel level)
 	{
 		this->printers = printers;
 		this->level = level;
@@ -96,7 +96,7 @@ public:
 	 * @param printer Pointer to printer class
 	 * @param level Logging level
 	 */
-	inline void begin(Print *printer, LoggingLevel level)
+	inline void begin(Print *printer, LoggingLevel level = LoggingLevel::ALL)
 	{
 		this->printer = printer;
 		this->level = level;
@@ -147,11 +147,14 @@ void LoggerClass::log(TagType tag, MessageType content)
 		return;
 
 #ifdef LOGGER_ALLOW_MULTIPLE_OUTPUTS
-	for (Print *printer : this->printers)
+	for (auto &printer : this->printers)
 	{
 		// Check bad printer
 		if (printer == nullptr)
 			continue;
+
+			// TODO: Check pointer aligment on ESP devices
+			// EXCEPTION ON ESP DEVICES
 #endif
 		// Print to files
 		printer->print(LOGGING_LEVEL_NAMES[static_cast<uint8_t>(level)]);
