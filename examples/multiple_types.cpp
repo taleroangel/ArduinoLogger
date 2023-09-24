@@ -8,13 +8,13 @@ void setup()
 	delay(2000);
 
 	// Enable logger
-	Logger.begin(&Serial, LoggingLevel::ALL);
+	Logger.begin(&Serial, Level::ALL);
 
 	// Logs with different types
-	Logger.log<LoggingLevel::DEBUG>(F("char *"), "You can print char *");
-	Logger.log<LoggingLevel::INFO>(F("String"), String("Or a String class"));
-	Logger.log<LoggingLevel::WARN>(F("F() or PSTR()"), F("Or a PSTR() macro"));
-	Logger.log<LoggingLevel::ERROR>("Hi, i'm a char * tag", F("TAG can also have different types"));
+	Logger.log<Level::D>(F("char *"), "You can print char *");
+	Logger.log<Level::I>(F("String"), String("Or a String class"));
+	Logger.log<Level::W>(F("F() or PSTR()"), F("Or a PSTR() macro"));
+	Logger.log<Level::E>("Hi, i'm a char * tag", F("TAG can also have different types"));
 
 	// Printable class
 	class Foo : public Printable
@@ -31,7 +31,7 @@ void setup()
 	} foo;
 
 	// It is also posible to print your own objects
-	Logger.log<LoggingLevel::FATAL>(foo.class_name, foo);
+	Logger.log<Level::F>(foo.class_name, foo);
 }
 
 void loop()

@@ -29,66 +29,51 @@
 
 #include <Arduino.h>
 
-#ifdef LOGGER_ALLOW_MULTIPLE_OUTPUTS
-#include <initializer_list>
-#endif
-
 /**
- * @enum LoggingLevel
- * @brief Logging levels based on Log4J levels
+ * @enum Level
+ * @brief Logging levels based on Log4J levels + TRACE
  */
-enum class LoggingLevel
+enum class Level
 {
 	OFF,
-	FATAL,
-	ERROR,
-	WARN,
-	INFO,
-	DEBUG,
+	/// @brief Fatal: Application cannot continue
+	F,
+	/// @brief Error: Process failed but application execution can continue
+	E,
+	/// @brief Warning: Process cannot continue
+	W,
+	/// @brief Info: Show information to system user
+	I,
+	/// @brief Debug: Show information to developer
+	D,
+	/// @brief Trace: Code is being executed correctly
+	T,
 	ALL,
 };
 
 /**
- * @brief Strings with LoggingLevel names
+ * @brief Strings with Level names
  *
  */
 constexpr const char *LOGGING_LEVEL_NAMES
-	[static_cast<uint8_t>(LoggingLevel::ALL)] PROGMEM = {
+	[static_cast<uint8_t>(Level::ALL)] PROGMEM = {
 		"",
 		"FATAL",
 		"ERROR",
 		"WARN",
 		"INFO",
 		"DEBUG",
-};
+		"TRACE"};
 
 class LoggerClass
 {
 	/* --------- Variables --------- */
 private:
-#ifdef LOGGER_ALLOW_MULTIPLE_OUTPUTS
-	std::initializer_list<Print *> printers;
-#else
 	Print *printer = nullptr;
-#endif
-	LoggingLevel level = LoggingLevel::OFF;
+	Level level = Level::OFF;
 
 	/* --------- Public member functions --------- */
 public:
-#ifdef LOGGER_ALLOW_MULTIPLE_OUTPUTS
-	/**
-	 * @brief Attach multiple system printers (Print class)
-	 * ej: {&Serial, &customFile, &Other}
-	 *
-	 * @param printers List of Pointers to printers
-	 * @param level Logging level
-	 */
-	inline void begin(std::initializer_list<Print *> printers, LoggingLevel level)
-	{
-		this->printers = printers;
-		this->level = level;
-	}
-#else
 	/**
 	 * @brief Attach a system printer (Print class)
 	 * ej: &Serial
@@ -96,21 +81,20 @@ public:
 	 * @param printer Pointer to printer class
 	 * @param level Logging level
 	 */
-	inline void begin(Print *printer, LoggingLevel level = LoggingLevel::ALL)
+	inline void begin(Print *printer, Level level = Level::ALL)
 	{
 		this->printer = printer;
 		this->level = level;
 	}
-#endif
 
 	LoggerClass() = default;
 
 	/**
 	 * @brief Get current logging level
 	 * @note Logging level can only be set when begin() is invoked
-	 * @return LoggingLevel Logging level
+	 * @return Level Logging level
 	 */
-	inline LoggingLevel get_level() const
+	inline Level get_level() const
 	{
 		return this->level;
 	}
@@ -124,7 +108,7 @@ public:
 	 * @param tag TAG of the log (Usually a component name or __FILE__ macro)
 	 * @param content Content of the log
 	 */
-	template <LoggingLevel level, typename TagType, typename MessageType>
+	template <Level level, typename TagType, typename MessageType>
 	void log(TagType tag, MessageType content);
 };
 
@@ -137,36 +121,22 @@ extern LoggerClass Logger;
 #endif
 
 /* --------- Template declarations --------- */
-template <LoggingLevel level, typename TagType, typename MessageType>
+template <Level level, typename TagType, typename MessageType>
 void LoggerClass::log(TagType tag, MessageType content)
 {
 	// Check current logging level
 	if (level > this->level ||
-		level == LoggingLevel::OFF ||
-		level == LoggingLevel::ALL)
+		level == Level::OFF ||
+		level == Level::ALL)
 		return;
 
-#ifdef LOGGER_ALLOW_MULTIPLE_OUTPUTS
-	for (auto &printer : this->printers)
-	{
-		// Check bad printer
-		if (printer == nullptr)
-			continue;
-
-			// TODO: Check pointer aligment on ESP devices
-			// EXCEPTION ON ESP DEVICES
-#endif
-		// Print to files
-		printer->print(LOGGING_LEVEL_NAMES[static_cast<uint8_t>(level)]);
-		printer->print(F("\t["));
-		printer->print(tag);
-		printer->print(F("]\t"));
-		printer->println(content);
-		printer->flush();
-
-#ifdef LOGGER_ALLOW_MULTIPLE_OUTPUTS
-	}
-#endif
+	// Print to files
+	printer->print(LOGGING_LEVEL_NAMES[static_cast<uint8_t>(level)]);
+	printer->print(F("\t["));
+	printer->print(tag);
+	printer->print(F("]\t"));
+	printer->println(content);
+	printer->flush();
 }
 
 #endif // __LOGGER_H__
