@@ -25,10 +25,10 @@ INFO  [My Tag]  Hello world!
 ```
 All printable elements with `Printer class` are allowed:
 ```c++
-	Logger.log<Level::D>(F("char *"), "You can print char *");
-	Logger.log<Level::I>(F("String"), String("Or a String class"));
-	Logger.log<Level::W>(F("F() or PSTR()"), F("Or a PSTR() macro"));
-	Logger.log<Level::E>("Hi, i'm a char * tag", F("TAG can also have different types"));
+Logger.log<Level::D>(F("char *"), "You can print char *");
+Logger.log<Level::I>(F("String"), String("Or a String class"));
+Logger.log<Level::W>(F("F() or PSTR()"), F("Or a PSTR() macro"));
+Logger.log<Level::E>("Hi, i'm a char * tag", F("TAG can also have different types"));
 ```
 
 ## 🌡️ Logging levels
